@@ -1,6 +1,6 @@
 import './style.css';
 import { supabase } from './src/supabase.js';
-import { redirectToCheckout } from './src/stripe.js';
+import { redirectToCheckout } from './src/stripe.ts';
 import { products } from './src/stripe-config.js';
 
 let currentUser = null;
