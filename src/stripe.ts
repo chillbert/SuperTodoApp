@@ -1,7 +1,6 @@
 import { supabase } from './supabase';
-import { products } from './stripe-config';
 
-export async function createCheckoutSession(priceId: string, mode: 'payment' | 'subscription') {
+export async function createCheckoutSession(priceId: string, mode: 'payment' | 'subscription', metadata = {}) {
   const { data: { session } } = await supabase.auth.getSession();
 
   if (!session) {
@@ -19,6 +18,7 @@ export async function createCheckoutSession(priceId: string, mode: 'payment' | '
       success_url: `${window.location.origin}/success`,
       cancel_url: `${window.location.origin}/cancel`,
       mode,
+      metadata,
     }),
   });
 
@@ -31,28 +31,14 @@ export async function createCheckoutSession(priceId: string, mode: 'payment' | '
   return url;
 }
 
-export async function redirectToCheckout(priceId: string, mode: 'payment' | 'subscription') {
+export async function redirectToCheckout(priceId: string, mode: 'payment' | 'subscription', metadata = {}) {
   try {
-    const url = await createCheckoutSession(priceId, mode);
+    const url = await createCheckoutSession(priceId, mode, metadata);
     window.location.href = url;
   } catch (error) {
     console.error('Error redirecting to checkout:', error);
     throw error;
   }
-}
-
-export async function getUserSubscription() {
-  const { data: subscription, error } = await supabase
-    .from('stripe_user_subscriptions')
-    .select('*')
-    .maybeSingle();
-
-  if (error) {
-    console.error('Error fetching subscription:', error);
-    return null;
-  }
-
-  return subscription;
 }
 
 export async function getUserOrders() {

@@ -110,7 +110,7 @@ async function loadTodos() {
         onchange="window.handleToggleTodo('${todo.id}', this.checked)"
       >
       <span class="todo-text ${todo.is_complete ? 'completed' : ''}">${todo.title}</span>
-      <button class="delete-btn" onclick="window.handleDeleteTodo('${todo.id}')">Delete</button>
+      <button class="delete-btn" onclick="window.handleDeleteTodo('${todo.id}')">Delete (1.00 CHF)</button>
     </li>
   `).join('');
 }
@@ -201,15 +201,15 @@ window.handleToggleTodo = async (id, isComplete) => {
 };
 
 window.handleDeleteTodo = async (id) => {
-  const { error } = await supabase
-    .from('todos')
-    .delete()
-    .eq('id', id);
-
-  if (error) {
-    alert('Error deleting todo: ' + error.message);
-  } else {
-    loadTodos();
+  try {
+    await redirectToCheckout(
+      products.deleteTodos.priceId,
+      'payment',
+      { todoId: id }
+    );
+  } catch (error) {
+    console.error('Error initiating delete payment:', error);
+    alert('Error initiating payment. Please try again.');
   }
 };
 
