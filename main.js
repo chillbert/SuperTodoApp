@@ -166,9 +166,16 @@ window.handleSignIn = async (event) => {
 };
 
 window.handleSignOut = async () => {
-  const { error } = await supabase.auth.signOut();
-  if (error) {
-    alert('Error signing out: ' + error.message);
+  try {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error('Error signing out:', error);
+    }
+  } catch (error) {
+    console.error('Error during sign out:', error);
+  } finally {
+    // Force reload to clear any invalid session state
+    window.location.reload();
   }
 };
 
