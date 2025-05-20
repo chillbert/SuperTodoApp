@@ -29,16 +29,12 @@ async function init() {
 
 // Render the main app
 function renderApp() {
-  app.innerHTML = `
-    <div class="auth-container">
-      ${currentUser 
-        ? `<p>Welcome, ${currentUser.email}</p>
-           <button onclick="window.handleSignOut()">Sign Out</button>`
-        : `<button onclick="window.handleSignIn()">Sign In</button>
-           <button onclick="window.handleSignUp()">Sign Up</button>`
-      }
-    </div>
-    ${currentUser ? `
+  if (currentUser) {
+    app.innerHTML = `
+      <div class="auth-container">
+        <p>Welcome, ${currentUser.email}</p>
+        <button onclick="window.handleSignOut()" class="btn-primary">Sign Out</button>
+      </div>
       <div class="todo-container">
         <form class="todo-form" onsubmit="window.handleAddTodo(event)">
           <input type="text" class="todo-input" placeholder="Add a new todo..." required>
@@ -46,8 +42,48 @@ function renderApp() {
         </form>
         <ul class="todo-list" id="todoList"></ul>
       </div>
-    ` : '<p style="text-align: center">Please sign in to manage your todos</p>'}
-  `;
+    `;
+  } else {
+    app.innerHTML = `
+      <div class="auth-container">
+        <div id="authForms">
+          <form id="loginForm" class="auth-form" onsubmit="window.handleSignIn(event)">
+            <h2>Login</h2>
+            <div class="form-group">
+              <label for="loginEmail">Email</label>
+              <input type="email" id="loginEmail" required>
+            </div>
+            <div class="form-group">
+              <label for="loginPassword">Password</label>
+              <input type="password" id="loginPassword" required>
+            </div>
+            <button type="submit" class="btn-primary">Login</button>
+            <p class="auth-toggle">
+              Don't have an account? 
+              <a href="#" onclick="window.toggleForm('register')">Register</a>
+            </p>
+          </form>
+
+          <form id="registerForm" class="auth-form" style="display: none" onsubmit="window.handleSignUp(event)">
+            <h2>Register</h2>
+            <div class="form-group">
+              <label for="registerEmail">Email</label>
+              <input type="email" id="registerEmail" required>
+            </div>
+            <div class="form-group">
+              <label for="registerPassword">Password</label>
+              <input type="password" id="registerPassword" required>
+            </div>
+            <button type="submit" class="btn-secondary">Register</button>
+            <p class="auth-toggle">
+              Already have an account? 
+              <a href="#" onclick="window.toggleForm('login')">Login</a>
+            </p>
+          </form>
+        </div>
+      </div>
+    `;
+  }
 }
 
 // Load todos from Supabase
@@ -79,12 +115,25 @@ async function loadTodos() {
   `).join('');
 }
 
-// Auth handlers
-window.handleSignUp = async () => {
-  const email = prompt('Enter your email:');
-  const password = prompt('Enter your password:');
+// Toggle between login and register forms
+window.toggleForm = (formType) => {
+  const loginForm = document.getElementById('loginForm');
+  const registerForm = document.getElementById('registerForm');
   
-  if (!email || !password) return;
+  if (formType === 'register') {
+    loginForm.style.display = 'none';
+    registerForm.style.display = 'block';
+  } else {
+    loginForm.style.display = 'block';
+    registerForm.style.display = 'none';
+  }
+};
+
+// Auth handlers
+window.handleSignUp = async (event) => {
+  event.preventDefault();
+  const email = document.getElementById('registerEmail').value;
+  const password = document.getElementById('registerPassword').value;
 
   const { error } = await supabase.auth.signUp({
     email,
@@ -95,14 +144,14 @@ window.handleSignUp = async () => {
     alert('Error signing up: ' + error.message);
   } else {
     alert('Check your email for the confirmation link!');
+    window.toggleForm('login');
   }
 };
 
-window.handleSignIn = async () => {
-  const email = prompt('Enter your email:');
-  const password = prompt('Enter your password:');
-  
-  if (!email || !password) return;
+window.handleSignIn = async (event) => {
+  event.preventDefault();
+  const email = document.getElementById('loginEmail').value;
+  const password = document.getElementById('loginPassword').value;
 
   const { error } = await supabase.auth.signInWithPassword({
     email,
