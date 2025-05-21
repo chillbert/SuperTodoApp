@@ -31,8 +31,11 @@ async function init() {
 
 // Render the main app
 function renderApp() {
-  if (currentUser) {
-    app.innerHTML = `
+  app.innerHTML = `
+    <div class="app-bar">
+      <h1 class="app-title">Super Todo App</h1>
+    </div>
+    ${currentUser ? `
       <div class="auth-container">
         <p>Welcome, ${currentUser.email}</p>
         <button onclick="window.handleSignOut()" class="btn-primary">Sign Out</button>
@@ -44,9 +47,7 @@ function renderApp() {
         </form>
         <ul class="todo-list" id="todoList"></ul>
       </div>
-    `;
-  } else {
-    app.innerHTML = `
+    ` : `
       <div class="auth-container">
         <div id="authForms">
           <form id="loginForm" class="auth-form" onsubmit="window.handleSignIn(event)">
@@ -84,8 +85,8 @@ function renderApp() {
           </form>
         </div>
       </div>
-    `;
-  }
+    `}
+  `;
 }
 
 // Load todos from Supabase
