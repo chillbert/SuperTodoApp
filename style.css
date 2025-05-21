@@ -164,12 +164,37 @@ button:hover {
   width: 100%;
 }
 
+/* Success and Cancel pages */
+.success-page,
+.cancel-page {
+  background: #1a1a1a;
+  padding: 2rem;
+  border-radius: 8px;
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.order-details {
+  margin: 2rem 0;
+  text-align: left;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+}
+
+.order-details h2 {
+  margin-top: 0;
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
     background-color: #ffffff;
   }
-  .todo-container, .auth-form {
+  .todo-container,
+  .auth-form,
+  .success-page,
+  .cancel-page {
     background: #f9f9f9;
   }
   .todo-item {
@@ -178,5 +203,8 @@ button:hover {
   .app-bar {
     background: #f0f0f0;
     border-bottom: 1px solid #ddd;
+  }
+  .order-details {
+    background: rgba(0, 0, 0, 0.05);
   }
 }

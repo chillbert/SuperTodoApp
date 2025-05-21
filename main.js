@@ -14,7 +14,7 @@ async function init() {
   const { data: { session } } = await supabase.auth.getSession();
   currentUser = session?.user;
   
-  renderApp();
+  handleRoute();
   if (currentUser) {
     loadTodos();
   }
@@ -22,11 +22,73 @@ async function init() {
   // Listen for auth changes
   supabase.auth.onAuthStateChange((_event, session) => {
     currentUser = session?.user;
-    renderApp();
+    handleRoute();
     if (currentUser) {
       loadTodos();
     }
   });
+
+  // Handle navigation
+  window.addEventListener('popstate', handleRoute);
+}
+
+// Handle routing
+function handleRoute() {
+  const path = window.location.pathname;
+  
+  switch (path) {
+    case '/success':
+      renderSuccessPage();
+      break;
+    case '/cancel':
+      renderCancelPage();
+      break;
+    default:
+      renderApp();
+  }
+}
+
+// Render the success page
+async function renderSuccessPage() {
+  if (!currentUser) {
+    window.location.href = '/';
+    return;
+  }
+
+  const { data: orders, error } = await supabase
+    .from('stripe_user_orders')
+    .select('*')
+    .order('order_date', { ascending: false })
+    .limit(1);
+
+  const order = orders?.[0];
+
+  app.innerHTML = `
+    <div class="success-page">
+      <h1>Payment Successful!</h1>
+      ${order ? `
+        <div class="order-details">
+          <h2>Order Details</h2>
+          <p>Order ID: ${order.order_id}</p>
+          <p>Amount: ${(order.amount_total / 100).toFixed(2)} ${order.currency.toUpperCase()}</p>
+          <p>Status: ${order.order_status}</p>
+          <p>Date: ${new Date(order.order_date).toLocaleDateString()}</p>
+        </div>
+      ` : ''}
+      <a href="/" class="btn-primary">Return to Home</a>
+    </div>
+  `;
+}
+
+// Render the cancel page
+function renderCancelPage() {
+  app.innerHTML = `
+    <div class="cancel-page">
+      <h1>Payment Cancelled</h1>
+      <p>Your payment was cancelled. No charges were made.</p>
+      <a href="/" class="btn-primary">Return to Home</a>
+    </div>
+  `;
 }
 
 // Render the main app
